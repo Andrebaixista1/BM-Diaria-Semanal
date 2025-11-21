@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Painel Local de BM's</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f3f4f6;
+      color: #111827;
+    }
+
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 16px 40px;
+    }
+
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 24px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    header p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #6b7280;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 16px 18px;
+      box-shadow: 0 10px 25px rgba(15,23,42,0.08);
+    }
+
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 2fr 1.3fr;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    @media (max-width: 900px) {
+      .layout-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+
+    .filters-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .filters label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #4b5563;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .filters input[type="date"],
+    .filters select {
+      padding: 6px 8px;
+      font-size: 0.8rem;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      min-width: 140px;
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: none;
+      padding: 7px 14px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+      transition: background 0.15s ease, transform 0.05s ease;
+    }
+
+    .btn-primary {
+      background: #2563eb;
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .btn-secondary:hover {
+      background: #d1d5db;
+    }
+
+    .btn-danger {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .btn-danger:hover {
+      background: #fecaca;
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 900px) {
+      .summary-cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .summary-card {
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+    }
+
+    .summary-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+
+    .summary-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .summary-sub {
+      font-size: 0.75rem;
+      color: #9ca3af;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    thead {
+      background: #f9fafb;
+    }
+
+    th, td {
+      padding: 8px 6px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+      vertical-align: top;
+    }
+
+    th {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6b7280;
+    }
+
+    tbody tr:hover {
+      background: #f3f4f6;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .badge-aprovado {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .badge-analise {
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+
+    .badge-banido {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .badge-congelado {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .form-section-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #111827;
+    }
+
+    .small-help {
+      font-size: 0.7rem;
+      color: #9ca3af;
+      margin-bottom: 10px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.8rem;
+    }
+
+    .form-field label {
+      font-weight: 500;
+      color: #4b5563;
+    }
+
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      padding: 7px 8px;
+      font-size: 0.8rem;
+      background: #f9fafb;
+    }
+
+    .form-field textarea {
+      resize: vertical;
+      min-height: 48px;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      gap: 8px;
+    }
+
+    .tag-empresa {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: #374151;
+    }
+
+    .no-data {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      text-align: center;
+      padding: 16px 0;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <h1>Painel Local de BM's</h1>
+      <p>Controle diário das BM's por empresa, com atualização rápida e local.</p>
+    </header>
+
+    <div class="layout-grid">
+      <!-- ESQUERDA: FILTROS + TABELA -->
+      <div class="card">
+        <div class="filters">
+          <div class="filters-group">
+            <label>
+              Dia (criação)
+              <input type="date" id="filterDate">
+            </label>
+            <label>
+              Empresa
+              <select id="filterEmpresa">
+                <option value="">Todas</option>
+              </select>
+            </label>
+            <label>
+              Status
+              <select id="filterStatus">
+                <option value="">Todos</option>
+                <option value="aprovado">Aprovado</option>
+                <option value="analise">Em análise</option>
+                <option value="banido">Banido</option>
+                <option value="congelado">Site congelado</option>
+              </select>
+            </label>
+          </div>
+          <button class="btn btn-secondary" id="btnClearFilters">Limpar filtros</button>
+        </div>
+
+        <div class="summary-cards" id="summaryCards"></div>
+
+        <div style="overflow-x:auto; max-height: 430px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Empresa</th>
+                <th>Facebook / BM</th>
+                <th>Status</th>
+                <th>Obs.</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- DIREITA: FORMULÁRIO -->
+      <div class="card">
+        <div class="form-section-title">Atualização diária</div>
+        <div class="small-help">
+          Preencha os campos abaixo para registrar ou atualizar uma BM.<br>
+          O sistema identifica a BM pela combinação <strong>Empresa + Facebook/BM</strong>. Se já existir, o status é atualizado.
+        </div>
+
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="inputDate">Data de criação</label>
+            <input type="date" id="inputDate">
+          </div>
+
+          <div class="form-field">
+            <label for="inputEmpresa">Empresa</label>
+            <select id="inputEmpresa"></select>
+          </div>
+
+          <div class="form-field">
+            <label for="inputFacebook">Facebook / Nome</label>
+            <input type="text" id="inputFacebook" placeholder="Ex: Jessica, Gabriel, Maria...">
+          </div>
+
+          <div class="form-field">
+            <label for="inputPortfolio">BM / Portfólio</label>
+            <input type="text" id="inputPortfolio" placeholder="Ex: KM, CAMP, VIEIRA 2...">
+          </div>
+
+          <div class="form-field">
+            <label for="inputStatus">Status</label>
+            <select id="inputStatus">
+              <option value="aprovado">Aprovado</option>
+              <option value="analise">Em análise</option>
+              <option value="banido">Banido</option>
+              <option value="congelado">Site congelado</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="inputObs">Observações</label>
+            <textarea id="inputObs" placeholder="Opcional. Ex: banido após uso, domínio .shop, site congelado, etc."></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-primary" id="btnSalvar">Salvar / Atualizar BM</button>
+          <button class="btn btn-danger" id="btnLimparTudo" title="Apaga todos os registros salvos neste navegador">
+            Limpar todos os dados
+          </button>
+        </div>
+
+        <div class="small-help">
+          Os dados ficam salvos apenas <strong>neste computador/navegador</strong> (localStorage).  
+          Para começar do zero, use o botão <strong>“Limpar todos os dados”</strong>.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const EMPRESAS = ["Vieira", "Prado", "2A", "M2", "VMC", "3P", "GBR"];
+    const STORAGE_KEY = "bm-dashboard-local-v1";
+    let bmRegistros = [];
+
+    function carregarDados() {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            bmRegistros = parsed;
+            return;
+          }
+        } catch (e) {
+          console.warn("Erro ao ler localStorage, iniciando vazio.");
+        }
+      }
+      bmRegistros = [];
+      salvarDados();
+    }
+
+    function salvarDados() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(bmRegistros));
+    }
+
+    function preencherSelectEmpresas() {
+      const filterEmpresa = document.getElementById("filterEmpresa");
+      const inputEmpresa = document.getElementById("inputEmpresa");
+
+      EMPRESAS.forEach(emp => {
+        const opt1 = document.createElement("option");
+        opt1.value = emp;
+        opt1.textContent = emp;
+        filterEmpresa.appendChild(opt1);
+
+        const opt2 = document.createElement("option");
+        opt2.value = emp;
+        opt2.textContent = emp;
+        inputEmpresa.appendChild(opt2);
+      });
+    }
+
+    function statusToBadge(status) {
+      switch (status) {
+        case "aprovado":
+          return { text: "Aprovado", class: "badge badge-aprovado" };
+        case "analise":
+          return { text: "Em análise", class: "badge badge-analise" };
+        case "banido":
+          return { text: "Banido", class: "badge badge-banido" };
+        case "congelado":
+          return { text: "Site congelado", class: "badge badge-congelado" };
+        default:
+          return { text: status, class: "badge" };
+      }
+    }
+
+    function formatDateBr(isoDate) {
+      if (!isoDate) return "";
+      const d = new Date(isoDate);
+      if (isNaN(d.getTime())) return "";
+      const dia = String(d.getDate()).padStart(2, "0");
+      const mes = String(d.getMonth() + 1).padStart(2, "0");
+      const ano = d.getFullYear();
+      return `${dia}/${mes}/${ano}`;
+    }
+
+    function aplicarFiltros() {
+      const fDate = document.getElementById("filterDate").value;
+      const fEmpresa = document.getElementById("filterEmpresa").value;
+      const fStatus = document.getElementById("filterStatus").value;
+
+      return bmRegistros.filter(r => {
+        let ok = true;
+        if (fDate) ok = ok && r.data === fDate;
+        if (fEmpresa) ok = ok && r.empresa === fEmpresa;
+        if (fStatus) ok = ok && r.status === fStatus;
+        return ok;
+      });
+    }
+
+    function atualizarResumo(lista) {
+      const total = lista.length;
+      let aprovados = 0, analise = 0, banidos = 0, congelados = 0;
+
+      lista.forEach(r => {
+        if (r.status === "aprovado") aprovados++;
+        else if (r.status === "analise") analise++;
+        else if (r.status === "banido") banidos++;
+        else if (r.status === "congelado") congelados++;
+      });
+
+      const summary = document.getElementById("summaryCards");
+      summary.innerHTML = "";
+
+      const cardsInfo = [
+        { label: "Total BM's", value: total, sub: "Registros nesta visualização" },
+        { label: "Aprovadas", value: aprovados, sub: "Status Aprovado" },
+        { label: "Em análise", value: analise, sub: "Aguardando retorno" },
+        { label: "Banidas / Congeladas", value: banidos + congelados, sub: "Problemas / Sites" }
+      ];
+
+      cardsInfo.forEach(info => {
+        const div = document.createElement("div");
+        div.className = "summary-card";
+        div.innerHTML = `
+          <div class="summary-title">${info.label}</div>
+          <div class="summary-value">${info.value}</div>
+          <div class="summary-sub">${info.sub}</div>
+        `;
+        summary.appendChild(div);
+      });
+    }
+
+    function renderTabela() {
+      const lista = aplicarFiltros().sort((a, b) => {
+        if (a.data === b.data) {
+          if (a.empresa === b.empresa) {
+            return (a.facebook || "").localeCompare(b.facebook || "");
+          }
+          return a.empresa.localeCompare(b.empresa);
+        }
+        return a.data.localeCompare(b.data);
+      });
+
+      const tbody = document.getElementById("tableBody");
+      tbody.innerHTML = "";
+
+      if (lista.length === 0) {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = 5;
+        td.className = "no-data";
+        td.textContent = "Nenhum registro encontrado. Cadastre as BM's no painel ao lado.";
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+      } else {
+        lista.forEach(r => {
+          const tr = document.createElement("tr");
+          const badge = statusToBadge(r.status);
+          tr.innerHTML = `
+            <td>${formatDateBr(r.data)}</td>
+            <td><span class="tag-empresa">${r.empresa}</span></td>
+            <td>
+              <div><strong>${r.facebook || "-"}</strong></div>
+              <div style="font-size:0.7rem;color:#6b7280;">${r.portfolio || ""}</div>
+            </td>
+            <td><span class="${badge.class}">${badge.text}</span></td>
+            <td style="max-width:220px; font-size:0.75rem;">${r.obs || ""}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      atualizarResumo(lista);
+    }
+
+    function limparFiltros() {
+      document.getElementById("filterDate").value = "";
+      document.getElementById("filterEmpresa").value = "";
+      document.getElementById("filterStatus").value = "";
+      renderTabela();
+    }
+
+    function salvarRegistro() {
+      const data = document.getElementById("inputDate").value;
+      const empresa = document.getElementById("inputEmpresa").value;
+      const facebook = document.getElementById("inputFacebook").value.trim();
+      const portfolio = document.getElementById("inputPortfolio").value.trim();
+      const status = document.getElementById("inputStatus").value;
+      const obs = document.getElementById("inputObs").value.trim();
+
+      if (!data || !empresa || (!facebook && !portfolio)) {
+        alert("Preencha pelo menos Data, Empresa e Facebook/BM.");
+        return;
+      }
+
+      const key = (empresa + "::" + facebook.toLowerCase() + "::" + portfolio.toLowerCase());
+
+      let encontrado = false;
+      bmRegistros = bmRegistros.map(r => {
+        const rKey = (r.empresa + "::" + (r.facebook || "").toLowerCase() + "::" + (r.portfolio || "").toLowerCase());
+        if (rKey === key) {
+          encontrado = true;
+          return { ...r, data, status, obs };
+        }
+        return r;
+      });
+
+      if (!encontrado) {
+        bmRegistros.push({
+          id: String(Date.now()) + Math.random().toString(16).slice(2),
+          data,
+          empresa,
+          facebook,
+          portfolio,
+          status,
+          obs
+        });
+      }
+
+      salvarDados();
+      renderTabela();
+
+      document.getElementById("inputFacebook").value = "";
+      document.getElementById("inputPortfolio").value = "";
+      document.getElementById("inputObs").value = "";
+    }
+
+    function limparTodosDados() {
+      if (!confirm("Tem certeza que deseja apagar TODOS os registros deste painel neste navegador?")) return;
+      bmRegistros = [];
+      salvarDados();
+      renderTabela();
+    }
+
+    carregarDados();
+    preencherSelectEmpresas();
+    renderTabela();
+
+    document.getElementById("filterDate").addEventListener("change", renderTabela);
+    document.getElementById("filterEmpresa").addEventListener("change", renderTabela);
+    document.getElementById("filterStatus").addEventListener("change", renderTabela);
+    document.getElementById("btnClearFilters").addEventListener("click", limparFiltros);
+    document.getElementById("btnSalvar").addEventListener("click", salvarRegistro);
+    document.getElementById("btnLimparTudo").addEventListener("click", limparTodosDados);
+
+    const today = new Date().toISOString().slice(0,10);
+    document.getElementById("inputDate").value = today;
+  </script>
+</body>
+</html>
