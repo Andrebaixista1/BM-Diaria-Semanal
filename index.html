@@ -13,9 +13,13 @@
         <div class="modal-content">
             <div class="modal-title">Tem certeza que deseja excluir este registro?</div>
             <div class="modal-message">Esta ação não pode ser desfeita.</div>
+            <div style="margin-bottom: 15px;">
+                <input type="password" id="modalPassword" placeholder="Senha de administrador"
+                    style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem;">
+            </div>
             <div class="modal-actions">
                 <button class="btn btn-secondary" id="modalCancelar">Cancelar</button>
-                <button class="btn btn-danger" id="modalConfirmar">Excluir</button>
+                <button class="btn btn-danger" id="modalConfirmar" disabled>Excluir</button>
             </div>
         </div>
     </div>
@@ -43,7 +47,17 @@
                     <button class="btn btn-secondary" id="btnClearFilters">Limpar filtros</button>
                 </div>
                 <div class="summary-cards" id="summaryCards"></div>
-                <div style="overflow-x:auto; max-height: 430px;">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 15px;">
+                    <input type="text" id="searchInput" placeholder="Buscar por empresa, nome ou observação..."
+                        style="flex: 1; max-width: 350px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.85rem; background: #f9fafb;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button class="pagination-btn" id="prevPage" disabled>&lt;</button>
+                        <span class="pagination-info" id="pageInfo">Página 1 de 1</span>
+                        <button class="pagination-btn" id="nextPage" disabled>&gt;</button>
+                    </div>
+                </div>
+                <div style="overflow-x:auto;">
                     <table>
                         <thead>
                             <tr>
@@ -93,7 +107,7 @@
             </div>
         </div>
     </div>
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
 
 </html>

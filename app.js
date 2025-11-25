@@ -2,7 +2,10 @@ console.log('App.js carregado!');
 
 const EMPRESAS = ["Vieira", "Prado", "2A", "M2", "VMC", "3P", "GBR"];
 const STORAGE_KEY = "bm-dashboard-local-v1";
+const DELETE_PASSWORD = "V!e!r@BM$";
 let bmRegistros = [];
+let currentPage = 1;
+const itemsPerPage = 50;
 
 function carregarDados() {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -39,20 +42,41 @@ function statusToBadge(status) {
 
 function formatDateBr(isoDate) {
     if (!isoDate) return "";
+    if (isoDate.length === 10) {
+        const [ano, mes, dia] = isoDate.split('-');
+        return `${dia}/${mes}/${ano}`;
+    }
     const d = new Date(isoDate);
     if (isNaN(d.getTime())) return "";
-    return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+    return `${String(d.getUTCDate()).padStart(2, "0")}/${String(d.getUTCMonth() + 1).padStart(2, "0")}/${d.getUTCFullYear()}`;
 }
 
 function aplicarFiltros() {
     const fDate = document.getElementById("filterDate").value;
     const fEmpresa = document.getElementById("filterEmpresa").value;
     const fStatus = document.getElementById("filterStatus").value;
+    const searchTerm = document.getElementById("searchInput")?.value.toLowerCase() || "";
+
     return bmRegistros.filter(r => {
         let ok = true;
         if (fDate) ok = ok && r.data === fDate;
         if (fEmpresa) ok = ok && r.empresa === fEmpresa;
         if (fStatus) ok = ok && r.status === fStatus;
+
+        if (searchTerm) {
+            const empresa = (r.empresa || "").toLowerCase();
+            const facebook = (r.facebook || "").toLowerCase();
+            const portfolio = (r.portfolio || "").toLowerCase();
+            const obs = (r.obs || "").toLowerCase();
+
+            ok = ok && (
+                empresa.includes(searchTerm) ||
+                facebook.includes(searchTerm) ||
+                portfolio.includes(searchTerm) ||
+                obs.includes(searchTerm)
+            );
+        }
+
         return ok;
     });
 }
@@ -82,24 +106,44 @@ function atualizarResumo(lista) {
     });
 }
 
+function renderPagination(totalItems) {
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const pageInfo = document.getElementById("pageInfo");
+    const prevBtn = document.getElementById("prevPage");
+    const nextBtn = document.getElementById("nextPage");
+
+    if (pageInfo) pageInfo.textContent = `Página ${currentPage} de ${totalPages}`;
+    if (prevBtn) prevBtn.disabled = currentPage === 1;
+    if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
+}
+
 function renderTabela() {
     const lista = aplicarFiltros().sort((a, b) => b.data.localeCompare(a.data));
     const tbody = document.getElementById("tableBody");
     if (!tbody) return;
+
+    const totalItems = lista.length;
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedList = lista.slice(startIndex, endIndex);
+
     tbody.innerHTML = "";
-    if (lista.length === 0) {
+    if (paginatedList.length === 0) {
         const tr = document.createElement("tr");
         tr.innerHTML = `<td colspan="6" class="no-data">Nenhum registro encontrado. Cadastre as BM's no painel ao lado.</td>`;
         tbody.appendChild(tr);
     } else {
-        lista.forEach(r => {
+        paginatedList.forEach(r => {
             const badge = statusToBadge(r.status);
             const tr = document.createElement("tr");
             tr.innerHTML = `<td>${formatDateBr(r.data)}</td><td><span class="tag-empresa">${r.empresa}</span></td><td><div><strong>${r.facebook || "-"}</strong></div><div style="font-size:0.7rem;color:#6b7280;">${r.portfolio || ""}</div></td><td><span class="${badge.class}">${badge.text}</span></td><td style="max-width:220px; font-size:0.75rem;">${r.obs || ""}</td><td style="text-align:center;"><button class="btn-delete" data-id="${r.id}" title="Excluir registro" style="background:none;border:none;cursor:pointer;padding:4px 8px;transition:opacity 0.2s;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 4h12M5.333 4V2.667a1.333 1.333 0 0 1 1.334-1.334h2.666a1.333 1.333 0 0 1 1.334 1.334V4m2 0v9.333a1.333 1.333 0 0 1-1.334 1.334H4.667a1.333 1.333 0 0 1-1.334-1.334V4h9.334Z" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></td>`;
             tbody.appendChild(tr);
         });
     }
+
     atualizarResumo(lista);
+    renderPagination(totalItems);
+
     setTimeout(() => {
         document.querySelectorAll('.btn-delete').forEach(btn => {
             btn.addEventListener('click', function () {
@@ -114,23 +158,31 @@ function excluirRegistro(id) {
     const modal = document.getElementById('confirmModal');
     const btnConfirmar = document.getElementById('modalConfirmar');
     const btnCancelar = document.getElementById('modalCancelar');
+    const passwordInput = document.getElementById('modalPassword');
 
-    if (!modal || !btnConfirmar || !btnCancelar) {
+    if (!modal || !btnConfirmar || !btnCancelar || !passwordInput) {
         console.error('Modal elements not found');
         return;
     }
 
     modal.classList.add('active');
+    passwordInput.value = '';
+    btnConfirmar.disabled = true;
 
-    // Reset handlers
+    passwordInput.oninput = () => {
+        btnConfirmar.disabled = passwordInput.value !== DELETE_PASSWORD;
+    };
+
     btnConfirmar.onclick = null;
     btnCancelar.onclick = null;
 
-    btnCancelar.onclick = () => modal.classList.remove('active');
+    btnCancelar.onclick = () => {
+        modal.classList.remove('active');
+        passwordInput.oninput = null;
+    };
 
     btnConfirmar.onclick = () => {
-        console.log('Confirmar clicado!');
-        // Use loose equality (==) to match string/number IDs
+        console.log('Senha correta! Prosseguindo com exclusão...');
         const registro = bmRegistros.find(r => r.id == id);
         console.log('Registro encontrado:', registro);
 
@@ -138,7 +190,7 @@ function excluirRegistro(id) {
             const payload = {
                 id: registro.id,
                 empresa: registro.empresa,
-                nome: registro.facebook // Sending facebook as nome as requested
+                nome: registro.facebook
             };
 
             console.log('Enviando POST:', payload);
@@ -158,15 +210,23 @@ function excluirRegistro(id) {
             console.error('Registro não encontrado para ID:', id);
         }
         modal.classList.remove('active');
+        passwordInput.oninput = null;
     };
 
-    modal.onclick = e => { if (e.target === modal) modal.classList.remove('active'); };
+    modal.onclick = e => {
+        if (e.target === modal) {
+            modal.classList.remove('active');
+            passwordInput.oninput = null;
+        }
+    };
 }
 
 function limparFiltros() {
     document.getElementById("filterDate").value = "";
     document.getElementById("filterEmpresa").value = "";
     document.getElementById("filterStatus").value = "";
+    document.getElementById("searchInput").value = "";
+    currentPage = 1;
     renderTabela();
 }
 
@@ -222,6 +282,7 @@ function limparTodosDados() {
     if (!confirm("Tem certeza que deseja apagar TODOS os registros deste painel neste navegador?")) return;
     bmRegistros = [];
     salvarDados();
+    currentPage = 1;
     renderTabela();
 }
 
@@ -240,7 +301,6 @@ function carregarDadosDaApi() {
         .catch(e => console.error('Erro ao carregar API:', e));
 }
 
-// Inicialização
 document.addEventListener('DOMContentLoaded', () => {
     carregarDados();
     preencherSelectEmpresas();
@@ -248,13 +308,16 @@ document.addEventListener('DOMContentLoaded', () => {
     carregarDadosDaApi();
 
     const filterDate = document.getElementById("filterDate");
-    if (filterDate) filterDate.addEventListener("change", renderTabela);
+    if (filterDate) filterDate.addEventListener("change", () => { currentPage = 1; renderTabela(); });
 
     const filterEmpresa = document.getElementById("filterEmpresa");
-    if (filterEmpresa) filterEmpresa.addEventListener("change", renderTabela);
+    if (filterEmpresa) filterEmpresa.addEventListener("change", () => { currentPage = 1; renderTabela(); });
 
     const filterStatus = document.getElementById("filterStatus");
-    if (filterStatus) filterStatus.addEventListener("change", renderTabela);
+    if (filterStatus) filterStatus.addEventListener("change", () => { currentPage = 1; renderTabela(); });
+
+    const searchInput = document.getElementById("searchInput");
+    if (searchInput) searchInput.addEventListener("input", () => { currentPage = 1; renderTabela(); });
 
     const btnClearFilters = document.getElementById("btnClearFilters");
     if (btnClearFilters) btnClearFilters.addEventListener("click", limparFiltros);
@@ -264,6 +327,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const btnLimparTudo = document.getElementById("btnLimparTudo");
     if (btnLimparTudo) btnLimparTudo.addEventListener("click", limparTodosDados);
+
+    const prevPage = document.getElementById("prevPage");
+    if (prevPage) prevPage.addEventListener("click", () => { if (currentPage > 1) { currentPage--; renderTabela(); } });
+
+    const nextPage = document.getElementById("nextPage");
+    if (nextPage) nextPage.addEventListener("click", () => { currentPage++; renderTabela(); });
 
     const inputDate = document.getElementById("inputDate");
     if (inputDate) inputDate.value = new Date().toISOString().slice(0, 10);
