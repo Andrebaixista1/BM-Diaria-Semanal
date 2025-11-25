@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "ask": [
+      "Read(!C:\\Users\\andrb\\Documents\\BM-Diaria-Semanal/**)",
+      "Edit(!C:\\Users\\andrb\\Documents\\BM-Diaria-Semanal/**)"
+    ],
+    "allow": [
+      "Read(C:\\Users\\andrb\\Documents\\BM-Diaria-Semanal/**)",
+      "Edit(C:\\Users\\andrb\\Documents\\BM-Diaria-Semanal/**)"
+    ]
+  },
+  "memoryImport": {},
+  "monitoring": {}
+}
