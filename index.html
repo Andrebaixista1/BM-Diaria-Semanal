@@ -1,25 +1,40 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8" />
     <title>Painel Local de BM's</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
     <div class="modal-overlay" id="confirmModal">
         <div class="modal-content">
             <div class="modal-title">Tem certeza que deseja excluir este registro?</div>
             <div class="modal-message">Esta ação não pode ser desfeita.</div>
             <div style="margin-bottom: 15px;">
-                <input type="password" id="modalPassword" placeholder="Senha de administrador"
-                    style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem;">
+                <input type="password" id="modalPassword" placeholder="Senha de administrador" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem;">
             </div>
             <div class="modal-actions">
                 <button class="btn btn-secondary" id="modalCancelar">Cancelar</button>
                 <button class="btn btn-danger" id="modalConfirmar" disabled>Excluir</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-title">Editar Registro</div>
+            <div style="display: flex; flex-direction: column; gap: 12px; margin: 20px 0;">
+                <div><label style="display: block; margin-bottom: 4px; font-size: 0.85rem; font-weight: 500;">Data de criação</label><input type="date" id="editDate" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px;"></div>
+                <div><label style="display: block; margin-bottom: 4px; font-size: 0.85rem; font-weight: 500;">Empresa</label><select id="editEmpresa" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px;"></select></div>
+                <div><label style="display: block; margin-bottom: 4px; font-size: 0.85rem; font-weight: 500;">Facebook / Nome</label><input type="text" id="editFacebook" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px;"></div>
+                <div><label style="display: block; margin-bottom: 4px; font-size: 0.85rem; font-weight: 500;">BM / Portfólio</label><input type="text" id="editPortfolio" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px;"></div>
+                <div><label style="display: block; margin-bottom: 4px; font-size: 0.85rem; font-weight: 500;">Status</label><select id="editStatus" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px;"><option value="aprovado">Aprovado</option><option value="analise">Em análise</option><option value="banido">Banido</option><option value="congelado">Site congelado</option></select></div>
+                <div><label style="display: block; margin-bottom: 4px; font-size: 0.85rem; font-weight: 500;">Observações</label><textarea id="editObs" rows="3" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; resize: vertical;"></textarea></div>
+                <div><label style="display: block; margin-bottom: 4px; font-size: 0.85rem; font-weight: 500; color: #dc2626;">Senha de administrador *</label><input type="password" id="editPassword" placeholder="Digite a senha para confirmar alteração" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px;"></div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="editCancelar">Cancelar</button>
+                <button class="btn btn-primary" id="editConfirmar" disabled>Salvar Alterações</button>
             </div>
         </div>
     </div>
@@ -33,24 +48,14 @@
                 <div class="filters">
                     <div class="filters-group">
                         <label>Dia (criação)<input type="date" id="filterDate"></label>
-                        <label>Empresa<select id="filterEmpresa">
-                                <option value="">Todas</option>
-                            </select></label>
-                        <label>Status<select id="filterStatus">
-                                <option value="">Todos</option>
-                                <option value="aprovado">Aprovado</option>
-                                <option value="analise">Em análise</option>
-                                <option value="banido">Banido</option>
-                                <option value="congelado">Site congelado</option>
-                            </select></label>
+                        <label>Empresa<select id="filterEmpresa"><option value="">Todas</option></select></label>
+                        <label>Status<select id="filterStatus"><option value="">Todos</option><option value="aprovado">Aprovado</option><option value="analise">Em análise</option><option value="banido">Banido</option><option value="congelado">Site congelado</option></select></label>
                     </div>
                     <button class="btn btn-secondary" id="btnClearFilters">Limpar filtros</button>
                 </div>
                 <div class="summary-cards" id="summaryCards"></div>
-                <div
-                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 15px;">
-                    <input type="text" id="searchInput" placeholder="Buscar por empresa, nome ou observação..."
-                        style="flex: 1; max-width: 350px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.85rem; background: #f9fafb;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 15px;">
+                    <input type="text" id="searchInput" placeholder="Buscar por empresa, nome ou observação..." style="flex: 1; max-width: 350px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.85rem; background: #f9fafb;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <button class="pagination-btn" id="prevPage" disabled>&lt;</button>
                         <span class="pagination-info" id="pageInfo">Página 1 de 1</span>
@@ -59,55 +64,30 @@
                 </div>
                 <div style="overflow-x:auto;">
                     <table>
-                        <thead>
-                            <tr>
-                                <th>Data</th>
-                                <th>Empresa</th>
-                                <th>Facebook / BM</th>
-                                <th>Status</th>
-                                <th>Obs.</th>
-                                <th>Ação</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>Data</th><th>Empresa</th><th>Facebook / BM</th><th>Status</th><th>Obs.</th><th>Ação</th></tr></thead>
                         <tbody id="tableBody"></tbody>
                     </table>
                 </div>
             </div>
             <div class="card">
                 <div class="form-section-title">Atualização diária</div>
-                <div class="small-help">Preencha os campos abaixo para registrar ou atualizar uma BM.<br>O sistema
-                    identifica a BM pela combinação <strong>Empresa + Facebook/BM</strong>. Se já existir, o status é
-                    atualizado.</div>
+                <div class="small-help">Preencha os campos abaixo para registrar ou atualizar uma BM.<br>O sistema identifica a BM pela combinação <strong>Empresa + Facebook/BM</strong>. Se já existir, o status é atualizado.</div>
                 <div class="form-grid">
-                    <div class="form-field"><label for="inputDate">Data de criação</label><input type="date"
-                            id="inputDate"></div>
-                    <div class="form-field"><label for="inputEmpresa">Empresa</label><select id="inputEmpresa"></select>
-                    </div>
-                    <div class="form-field"><label for="inputFacebook">Facebook / Nome</label><input type="text"
-                            id="inputFacebook" placeholder="Ex: Jessica, Gabriel, Maria..."></div>
-                    <div class="form-field"><label for="inputPortfolio">BM / Portfólio</label><input type="text"
-                            id="inputPortfolio" placeholder="Ex: KM, CAMP, VIEIRA 2..."></div>
-                    <div class="form-field"><label for="inputStatus">Status</label><select id="inputStatus">
-                            <option value="aprovado">Aprovado</option>
-                            <option value="analise">Em análise</option>
-                            <option value="banido">Banido</option>
-                            <option value="congelado">Site congelado</option>
-                        </select></div>
-                    <div class="form-field"><label for="inputObs">Observações</label><textarea id="inputObs"
-                            placeholder="Opcional. Ex: banido após uso, domínio .shop, site congelado, etc."></textarea>
-                    </div>
+                    <div class="form-field"><label for="inputDate">Data de criação</label><input type="date" id="inputDate"></div>
+                    <div class="form-field"><label for="inputEmpresa">Empresa</label><select id="inputEmpresa"></select></div>
+                    <div class="form-field"><label for="inputFacebook">Facebook / Nome</label><input type="text" id="inputFacebook" placeholder="Ex: Jessica, Gabriel, Maria..."></div>
+                    <div class="form-field"><label for="inputPortfolio">BM / Portfólio</label><input type="text" id="inputPortfolio" placeholder="Ex: KM, CAMP, VIEIRA 2..."></div>
+                    <div class="form-field"><label for="inputStatus">Status</label><select id="inputStatus"><option value="aprovado">Aprovado</option><option value="analise">Em análise</option><option value="banido">Banido</option><option value="congelado">Site congelado</option></select></div>
+                    <div class="form-field"><label for="inputObs">Observações</label><textarea id="inputObs" placeholder="Opcional. Ex: banido após uso, domínio .shop, site congelado, etc."></textarea></div>
                 </div>
                 <div class="form-actions">
                     <button class="btn btn-primary" id="btnSalvar">Salvar / Atualizar BM</button>
-                    <button class="btn btn-danger" id="btnLimparTudo"
-                        title="Apaga todos os registros salvos neste navegador">Limpar todos os dados</button>
+                    <button class="btn btn-danger" id="btnLimparTudo" title="Apaga todos os registros salvos neste navegador">Limpar todos os dados</button>
                 </div>
-                <div class="small-help">Os dados ficam salvos apenas <strong>neste computador/navegador</strong>
-                    (localStorage). Para começar do zero, use o botão <strong>"Limpar todos os dados"</strong>.</div>
+                <div class="small-help">Os dados ficam salvos apenas <strong>neste computador/navegador</strong> (localStorage). Para começar do zero, use o botão <strong>"Limpar todos os dados"</strong>.</div>
             </div>
         </div>
     </div>
     <script type="module" src="app.js"></script>
 </body>
-
 </html>

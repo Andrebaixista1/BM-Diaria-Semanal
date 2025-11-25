@@ -60,7 +60,6 @@ function aplicarFiltros() {
     return bmRegistros.filter(r => {
         let ok = true;
 
-        // Date filter - normalize both to YYYY-MM-DD format
         if (fDate) {
             const recordDate = r.data?.substring(0, 10) || r.data;
             ok = ok && recordDate === fDate;
@@ -72,7 +71,7 @@ function aplicarFiltros() {
         if (searchTerm) {
             const empresa = (r.empresa || "").toLowerCase();
             const facebook = (r.facebook || "").toLowerCase();
-            const portfolio = (r.portfolio || "").toLowerCase();
+            const portfolio = (r.portifolio || "").toLowerCase();
             const obs = (r.obs || "").toLowerCase();
 
             ok = ok && (
@@ -142,7 +141,8 @@ function renderTabela() {
         paginatedList.forEach(r => {
             const badge = statusToBadge(r.status);
             const tr = document.createElement("tr");
-            tr.innerHTML = `<td>${formatDateBr(r.data)}</td><td><span class="tag-empresa">${r.empresa}</span></td><td><div><strong>${r.facebook || "-"}</strong></div><div style="font-size:0.7rem;color:#6b7280;">${r.portfolio || ""}</div></td><td><span class="${badge.class}">${badge.text}</span></td><td style="max-width:220px; font-size:0.75rem;">${r.obs || ""}</td><td style="text-align:center;"><button class="btn-delete" data-id="${r.id}" title="Excluir registro" style="background:none;border:none;cursor:pointer;padding:4px 8px;transition:opacity 0.2s;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 4h12M5.333 4V2.667a1.333 1.333 0 0 1 1.334-1.334h2.666a1.333 1.333 0 0 1 1.334 1.334V4m2 0v9.333a1.333 1.333 0 0 1-1.334 1.334H4.667a1.333 1.333 0 0 1-1.334-1.334V4h9.334Z" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></td>`;
+            const portfolioText = r.portifolio ? `<div style="font-size:0.7rem;color:#6b7280;">${r.portifolio}</div>` : "";
+            tr.innerHTML = `<td>${formatDateBr(r.data)}</td><td><span class="tag-empresa">${r.empresa}</span></td><td><div><strong>${r.facebook || "-"}</strong></div>${portfolioText}</td><td><span class="${badge.class}">${badge.text}</span></td><td style="max-width:220px; font-size:0.75rem;">${r.obs || ""}</td><td style="text-align:center;"><button class="btn-edit" data-id="${r.id}" title="Editar registro" style="background:none;border:none;cursor:pointer;padding:4px 8px;transition:opacity 0.2s;margin-right:4px;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.333 2A1.886 1.886 0 0 1 14 4.667l-9 9-3.667 1 1-3.667 9-9Z" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="btn-delete" data-id="${r.id}" title="Excluir registro" style="background:none;border:none;cursor:pointer;padding:4px 8px;transition:opacity 0.2s;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 4h12M5.333 4V2.667a1.333 1.333 0 0 1 1.334-1.334h2.666a1.333 1.333 0 0 1 1.334 1.334V4m2 0v9.333a1.333 1.333 0 0 1-1.334 1.334H4.667a1.333 1.333 0 0 1-1.334-1.334V4h9.334Z" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></td>`;
             tbody.appendChild(tr);
         });
     }
@@ -151,12 +151,109 @@ function renderTabela() {
     renderPagination(totalItems);
 
     setTimeout(() => {
+        document.querySelectorAll('.btn-edit').forEach(btn => {
+            btn.addEventListener('click', function () {
+                editarRegistro(this.getAttribute('data-id'));
+            });
+        });
         document.querySelectorAll('.btn-delete').forEach(btn => {
             btn.addEventListener('click', function () {
                 excluirRegistro(this.getAttribute('data-id'));
             });
         });
     }, 100);
+}
+
+function editarRegistro(id) {
+    const registro = bmRegistros.find(r => r.id == id);
+    if (!registro) return;
+
+    const modal = document.getElementById('editModal');
+    const editEmpresa = document.getElementById('editEmpresa');
+    const editPassword = document.getElementById('editPassword');
+    const btnConfirmar = document.getElementById('editConfirmar');
+
+    if (editEmpresa.options.length === 0) {
+        EMPRESAS.forEach(emp => editEmpresa.appendChild(new Option(emp, emp)));
+    }
+
+    document.getElementById("editDate").value = registro.data;
+    document.getElementById("editEmpresa").value = registro.empresa;
+    document.getElementById("editFacebook").value = registro.facebook || "";
+    document.getElementById("editPortfolio").value = registro.portifolio || "";
+    document.getElementById("editStatus").value = registro.status;
+    document.getElementById("editObs").value = registro.obs || "";
+    editPassword.value = '';
+    btnConfirmar.disabled = true;
+
+    modal.classList.add('active');
+
+    editPassword.oninput = () => {
+        btnConfirmar.disabled = editPassword.value !== DELETE_PASSWORD;
+    };
+
+    const btnCancelar = document.getElementById('editCancelar');
+
+    btnConfirmar.onclick = null;
+    btnCancelar.onclick = null;
+
+    btnCancelar.onclick = () => {
+        modal.classList.remove('active');
+        editPassword.oninput = null;
+    };
+
+    btnConfirmar.onclick = () => {
+        const data = document.getElementById("editDate").value;
+        const empresa = document.getElementById("editEmpresa").value;
+        const facebook = document.getElementById("editFacebook").value.trim();
+        const portfolio = document.getElementById("editPortfolio").value.trim();
+        const status = document.getElementById("editStatus").value;
+        const obs = document.getElementById("editObs").value.trim();
+
+        if (!data || !empresa || (!facebook && !portfolio)) {
+            alert("Preencha pelo menos Data, Empresa e Facebook/BM.");
+            return;
+        }
+
+        bmRegistros = bmRegistros.map(r => {
+            if (r.id == id) {
+                return { ...r, data, empresa, facebook, portifolio: portfolio, status, obs };
+            }
+            return r;
+        });
+
+        salvarDados();
+        renderTabela();
+
+        const payload = {
+            id: registro.id,
+            data,
+            empresa,
+            facebook,
+            portifolio: portfolio,
+            status,
+            obs
+        };
+
+        fetch('https://webhook.sistemavieira.com.br/webhook/alter-bms', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+            .then(r => console.log('Alteração enviada:', r.status))
+            .then(() => carregarDadosDaApi())
+            .catch(e => console.log('Erro ao alterar:', e));
+
+        modal.classList.remove('active');
+        editPassword.oninput = null;
+    };
+
+    modal.onclick = e => {
+        if (e.target === modal) {
+            modal.classList.remove('active');
+            editPassword.oninput = null;
+        }
+    };
 }
 
 function excluirRegistro(id) {
@@ -253,7 +350,7 @@ function salvarRegistro() {
     let encontrado = false;
 
     bmRegistros = bmRegistros.map(r => {
-        const rKey = r.empresa + "::" + (r.facebook || "").toLowerCase() + "::" + (r.portfolio || "").toLowerCase();
+        const rKey = r.empresa + "::" + (r.facebook || "").toLowerCase() + "::" + (r.portifolio || "").toLowerCase();
         if (rKey === key) {
             encontrado = true;
             return { ...r, data, status, obs };
@@ -264,7 +361,7 @@ function salvarRegistro() {
     if (!encontrado) {
         bmRegistros.push({
             id: String(Date.now()) + Math.random().toString(16).slice(2),
-            data, empresa, facebook, portfolio, status, obs
+            data, empresa, facebook, portifolio: portfolio, status, obs
         });
     }
 
@@ -274,7 +371,7 @@ function salvarRegistro() {
     fetch('https://webhook.sistemavieira.com.br/webhook/save-bms', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data, empresa, facebook, portfolio, status, obs })
+        body: JSON.stringify({ data, empresa, facebook, portifolio: portfolio, status, obs })
     })
         .then(() => carregarDadosDaApi())
         .catch(() => { });
