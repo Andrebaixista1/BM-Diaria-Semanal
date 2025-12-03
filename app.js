@@ -235,7 +235,7 @@ function editarRegistro(id) {
             obs
         };
 
-        fetch('https://webhook.sistemavieira.com.br/webhook/alter-bms', {
+        fetch('https://n8n.apivieiracred.store/webhook/alter-bms', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -298,7 +298,7 @@ function excluirRegistro(id) {
 
             console.log('Enviando POST:', payload);
 
-            fetch('https://webhook.sistemavieira.com.br/webhook/delete-bms', {
+            fetch('https://n8n.apivieiracred.store/webhook/delete-bms', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -368,7 +368,7 @@ function salvarRegistro() {
     salvarDados();
     renderTabela();
 
-    fetch('https://webhook.sistemavieira.com.br/webhook/save-bms', {
+    fetch('https://n8n.apivieiracred.store/webhook/save-bms', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ data, empresa, facebook, portifolio: portfolio, status, obs })
@@ -392,7 +392,7 @@ function limparTodosDados() {
 
 function carregarDadosDaApi() {
     console.log('Carregando dados da API...');
-    fetch('https://webhook.sistemavieira.com.br/webhook/get-bms')
+    fetch('https://n8n.apivieiracred.store/webhook/get-bms')
         .then(r => r.json())
         .then(data => {
             console.log('Dados recebidos:', data);
